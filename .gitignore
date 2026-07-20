@@ -1,0 +1,9 @@
+# Zugangsdaten niemals ins Repo!
+api/config.php
+
+# Upload-Pakete
+*.zip
+
+# System
+.DS_Store
+Thumbs.db
