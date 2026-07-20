@@ -98,6 +98,9 @@
 
   .track-card { width: 200px; }
   .track-card .pot { color: #7dff9b; font-weight: 800; margin-top: 4px; }
+
+  .diff-row { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; }
+  .diff-btn { font-size: .95rem; padding: 9px 20px; }
 </style>
 </head>
 <body>
@@ -136,6 +139,7 @@
     <div id="tracks" class="overlay">
       <h2>🏁 Strecke wählen</h2>
       <p class="sub">Du fährst gegen 5 Gegner — 3 Runden. Je schwerer die Strecke, desto mehr Preisgeld!</p>
+      <div class="diff-row" id="diffRow"></div>
       <div class="track-grid" id="trackGrid"></div>
       <button class="btn secondary" id="btnTracksBack" style="margin-top:16px">← Zurück</button>
     </div>
