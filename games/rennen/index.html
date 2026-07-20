@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Turbo-Rennen 🏎️ — Noahs Spieleecke</title>
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+<style>
+  .game-page { max-width: 1000px; }
+  #wrap { position: relative; width: 100%; }
+  #game { background: #222; }
+
+  .overlay {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    border-radius: 16px;
+    background: linear-gradient(160deg, #1a1040ee, #17355eee);
+    backdrop-filter: blur(4px);
+    padding: 18px 14px 24px;
+  }
+  .overlay.show { display: flex; }
+
+  .overlay h2 { font-size: 1.8rem; margin: 6px 0 2px; text-align: center; }
+  .overlay .sub { opacity: .75; margin-bottom: 14px; text-align: center; }
+
+  .money-badge {
+    background: #ffd93d; color: #241a00; font-weight: 800;
+    padding: 6px 18px; border-radius: 999px; margin: 8px 0 14px;
+    box-shadow: 0 4px 14px #0006; font-size: 1.05rem;
+  }
+
+  .btn {
+    display: inline-block; border: 0; cursor: pointer;
+    background: #ffd93d; color: #241a00; font-weight: 800;
+    font-size: 1.05rem; padding: 12px 30px; border-radius: 999px;
+    box-shadow: 0 4px 14px #0006; margin: 6px;
+    transition: transform .12s;
+    font-family: inherit;
+  }
+  .btn:hover { transform: scale(1.05); }
+  .btn.secondary { background: #ffffff22; color: #f4f1ff; border: 1px solid #ffffff33; }
+  .btn.big { font-size: 1.3rem; padding: 16px 44px; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  .car-grid, .track-grid {
+    display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+    width: 100%;
+  }
+  .shop-card {
+    background: #ffffff10; border: 2px solid #ffffff22; border-radius: 16px;
+    padding: 12px; width: 172px; text-align: center; cursor: pointer;
+    transition: transform .12s, border-color .12s;
+  }
+  .shop-card:hover { transform: translateY(-4px); }
+  .shop-card.selected { border-color: #ffd93d; background: #ffd93d18; }
+  .shop-card.locked { opacity: .75; }
+  .shop-card h3 { font-size: 1.05rem; margin: 6px 0 4px; }
+  .shop-card canvas { width: 100%; border-radius: 8px; background: #ffffff0d; }
+  .statbar { height: 7px; background: #ffffff1c; border-radius: 4px; margin: 4px 0; overflow: hidden; }
+  .statbar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg,#6bcbff,#ffd93d); }
+  .stat-label { font-size: .68rem; opacity: .7; text-align: left; margin-top: 5px; }
+  .price { font-weight: 800; color: #ffd93d; margin: 6px 0 2px; }
+  .owned { color: #7dff9b; font-weight: 700; font-size: .9rem; margin: 6px 0 2px; }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0 4px; }
+  .swatch {
+    width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+    border: 3px solid #ffffff33; transition: transform .1s;
+  }
+  .swatch:hover { transform: scale(1.15); }
+  .swatch.sel { border-color: #fff; box-shadow: 0 0 0 3px #ffd93d; }
+  .custom-panel {
+    margin-top: 16px; background: #ffffff10; border-radius: 16px;
+    padding: 14px 18px; text-align: center; width: min(440px, 96%);
+  }
+  .custom-panel h3 { margin-bottom: 4px; }
+  .custom-panel .lbl { font-size: .85rem; opacity: .75; margin-top: 10px; }
+
+  #resultList { width: min(420px, 96%); margin: 10px 0; }
+  .res-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #ffffff10; border-radius: 10px; padding: 9px 16px; margin: 5px 0;
+    font-size: 1.02rem;
+  }
+  .res-row.me { background: #ffd93d2c; border: 1px solid #ffd93d88; font-weight: 700; }
+  .res-row .prize { color: #7dff9b; font-weight: 700; }
+
+  #nameBox input {
+    font-size: 1.05rem; padding: 10px 14px; border-radius: 10px; border: 0;
+    width: 200px; text-align: center; font-family: inherit;
+  }
+
+  #scoreList { width: min(420px, 96%); margin: 10px 0; }
+
+  .track-card { width: 200px; }
+  .track-card .pot { color: #7dff9b; font-weight: 800; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="game-page">
+  <div class="game-topbar">
+    <a href="../../">← Zurück</a>
+    <h1>🏎️ Turbo-Rennen</h1>
+    <span></span>
+  </div>
+
+  <div id="wrap">
+    <canvas id="game" width="960" height="600"></canvas>
+
+    <!-- ===== Hauptmenü ===== -->
+    <div id="menu" class="overlay">
+      <h2>🏎️ Turbo-Rennen</h2>
+      <p class="sub">Fahr Rennen, verdiene Geld und kauf dir Traumautos!</p>
+      <div class="money-badge" id="moneyMenu">💰 0 €</div>
+      <button class="btn big" id="btnRace">🏁 Rennen fahren</button>
+      <button class="btn secondary" id="btnGarage">🔧 Garage &amp; Shop</button>
+      <button class="btn secondary" id="btnScores">🏆 Bestenliste</button>
+      <p class="sub" style="margin-top:14px">Steuerung: ← → lenken · ↑ Gas · ↓ Bremse<br>(am Handy: Tasten auf dem Bildschirm)</p>
+    </div>
+
+    <!-- ===== Garage ===== -->
+    <div id="garage" class="overlay">
+      <h2>🔧 Garage &amp; Shop</h2>
+      <div class="money-badge" id="moneyGarage">💰 0 €</div>
+      <div class="car-grid" id="carGrid"></div>
+      <div class="custom-panel" id="customPanel"></div>
+      <button class="btn" id="btnGarageBack" style="margin-top:16px">✔ Fertig</button>
+    </div>
+
+    <!-- ===== Streckenwahl ===== -->
+    <div id="tracks" class="overlay">
+      <h2>🏁 Strecke wählen</h2>
+      <p class="sub">Du fährst gegen 5 Gegner — 3 Runden. Je schwerer die Strecke, desto mehr Preisgeld!</p>
+      <div class="track-grid" id="trackGrid"></div>
+      <button class="btn secondary" id="btnTracksBack" style="margin-top:16px">← Zurück</button>
+    </div>
+
+    <!-- ===== Ergebnis ===== -->
+    <div id="result" class="overlay">
+      <h2 id="resultTitle">🏁 Zieleinlauf</h2>
+      <div id="resultList"></div>
+      <div class="money-badge" id="moneyResult">💰 0 €</div>
+      <div id="nameBox" style="display:none; text-align:center">
+        <p class="sub">Wie heißt du? (für die Bestenliste)</p>
+        <input id="nameInput" maxlength="16" placeholder="Dein Name">
+        <button class="btn" id="btnSaveName">Speichern</button>
+      </div>
+      <div>
+        <button class="btn" id="btnAgain">🔄 Nochmal</button>
+        <button class="btn secondary" id="btnResultGarage">🔧 Garage</button>
+        <button class="btn secondary" id="btnResultMenu">🏠 Menü</button>
+      </div>
+    </div>
+
+    <!-- ===== Bestenliste ===== -->
+    <div id="scores" class="overlay">
+      <h2>🏆 Bestenliste</h2>
+      <p class="sub">Wer hat das meiste Geld verdient?</p>
+      <div id="scoreList"></div>
+      <button class="btn secondary" id="btnScoresBack">← Zurück</button>
+    </div>
+  </div>
+
+  <p class="hint">← → lenken · ↑ Gas · ↓ Bremse · P Pause · M Ton an/aus</p>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

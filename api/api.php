@@ -15,6 +15,7 @@ require __DIR__ . '/config.php';
 /* Erlaubte Spiele und maximale plausible Punktzahl je Spiel */
 const GAMES = [
     'sterne' => 100000,
+    'rennen' => 10000000,   // Score = Kontostand der Karriere
 ];
 
 function out(array $data, int $code = 200): void {
