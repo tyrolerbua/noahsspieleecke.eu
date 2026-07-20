@@ -36,9 +36,10 @@ const AI_NAMES = ["Blitz-Bernd", "Turbo-Tina", "Rasende Rita", "Speedy Paul", "D
 const PRIZE_SPLIT = [0.40, 0.25, 0.15, 0.10, 0.06, 0.04];
 
 const DIFFS = {
-  leicht: { label: "😌 Leicht", lo: 0.78, hi: 0.88, tierUp: 0, band: 0.11 },
-  mittel: { label: "😎 Mittel", lo: 0.90, hi: 0.97, tierUp: 0, band: 0.06 },
-  schwer: { label: "🔥 Schwer", lo: 0.98, hi: 1.05, tierUp: 1, band: 0.02 },
+  leicht: { label: "😌 Leicht", lo: 0.78, hi: 0.88, tierUp: 0, band: 0.11, react: 0.30 },
+  mittel: { label: "😎 Mittel", lo: 0.90, hi: 0.97, tierUp: 0, band: 0.06, react: 0.22 },
+  schwer: { label: "🔥 Schwer", lo: 1.00, hi: 1.07, tierUp: 1, band: 0.02, react: 0.12 },
+  extrem: { label: "💀 Extrem", lo: 1.06, hi: 1.14, tierUp: 2, band: 0.00, react: 0.06 },
 };
 
 /* ================= Spielstand ================= */
@@ -347,7 +348,8 @@ function aiOpponents(playerTier, diffKey) {
 
 function placeGrid() {
   cars.forEach((car, i) => {
-    car.launch = (demo ? 0.2 : 3.0) + i * 0.22;   // vordere Reihe fährt zuerst los
+    const react = demo ? 0.22 : DIFFS[save.diff].react;
+    car.launch = (demo ? 0.2 : 3.0) + i * react;   // vordere Reihe fährt zuerst los
     const row = Math.floor(i / 2), col = i % 2;
     const d = 320 - row * 85;
     const idx = idxAtDist(track, d);
@@ -484,7 +486,7 @@ function driveAI(car, dt) {
 
   const desired = Math.atan2(ty - car.y, tx - car.x);
   const diff = normAngle(desired - car.angle);
-  car.steer = Math.max(-1, Math.min(1, diff * 3.2));
+  car.steer = Math.max(-1, Math.min(1, diff * 3.6));
 
   // Vorausschauendes Bremsen: physikalisch mögliche Kurvengeschwindigkeit
   // (v_max = Lenkrate / Krümmung; Bremsweg über v² = v_c² + 2·a·D)
@@ -495,7 +497,7 @@ function driveAI(car, dt) {
     const turn = Math.abs(track.turnAt(car.ti, d, d + 6));
     const kappa = turn / (6 * track.step);
     if (kappa < 0.0005) continue;
-    const vc = (car.spec.turn * 0.78 * car.skill) / kappa;
+    const vc = (car.spec.turn * 0.80) / kappa;   // ohne Skill: Lenkphysik setzt die Grenze
     const D = Math.max(0, d * track.step - 30);
     target = Math.min(target, Math.sqrt(vc * vc + 2 * brake * D));
   }
